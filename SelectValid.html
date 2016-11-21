@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Validate</title>
+	<meta charset="UTF-8">
+</head>
+<body>
+	<form id="bestForm" name="bestForm" id="bestForm" action="" method="POST">
+	  	<fieldset>
+		<legend>Заполните все поля</legend>
+
+		<div class="fild">
+			<label>Имя:</label><br>
+			<input type="text" name="name" id="name">
+			<span id = "nameError"></span>
+		</div><br>
+
+		<div class="fild">
+			<label>E-Mail:</label><br>
+			<input type="text" name="email" id="email">
+			<span id = "emailError"></span>
+		</div><br>
+
+		<div class="fild">
+			<label>Телефон:</label><br>
+			<input type="text" placeholder="+380 (XXX) XXX-XX-XX " name="phone" id="phone">
+			<span id = "phoneError"></span>
+		</div><br>
+
+		<input id="button" type="button" value="jQuery валидация" onclick="validate()"/>
+		<input id="button" type="button" value="PHP валидация" onclick="AjaxFormRequest('bestForm', 'form.php')"/>
+
+		<span id="success"></span>
+
+		</fieldset>
+	</form>
+	<script>
+    	function getSpace(){
+			if ($('#nameError') != ""){
+                $('#nameError').text("");
+            }
+			if ($('#emailError') != ""){
+                $('#emailError').text("");
+            }
+			if ($('#phoneError') != ""){
+                $('#phoneError').text("");
+            }
+			if ($('#success') != ""){
+                $('#success').text("");
+            }
+    	}
+
+    	function AjaxFormRequest(bestForm,url) {
+   	        jQuery.ajax({
+                url:     url,
+                type:     "POST",
+                dataType: "html",
+                data: jQuery("#"+bestForm).serialize(), 
+                success: function(response) {
+                  	var answerValid = response.split('<br>'); //массив делим тегом
+                    getSpace("");
+                   	$('#nameError').append(answerValid[0]);
+                    $('#emailError').append(answerValid[1]);
+                    $("#phoneError").append(answerValid[2]);
+
+                    if (answerValid[0] == "" && answerValid[1] =="" && answerValid[2] == ""){
+                    	$('#success').text(answerValid[3]);
+						$(':input','#bestForm').not(':button, :submit').val('')
+                    }
+                },
+                error: function(response) {
+                	$("#success").text("Возникла ошибка при отправке формы");
+                }
+             });
+    	}
+	</script>
+	<script>
+		function validate() {
+			var msg = validName();
+			msg += validEmail();
+			msg += validPhone();
+			if (msg == "") {
+				$('#success').text("Проверка jQuery пройдена");
+				$(':input','#bestForm').not(':button, :submit').val('');
+                return true;
+            }
+            else {
+				$('#success').text("");
+                return false;
+            }
+		}
+
+		function validName(){
+			var name = $("#name").val();
+            if (name == "") {
+				msg = $('#nameError').text("Введите имя");
+                return msg;
+            }
+            else if(name.length<6 || name.length>12 ){
+                msg = $('#nameError').text("Введите имя длиной 6 - 12 символов");
+                return msg;
+            }
+            else {
+				$('#nameError').text("");
+                msg = "";
+                return msg;
+            }
+		}
+
+		function validPhone() {
+			var phone = $("#phone").val();
+			var filter = /^[0-9-]+$/;
+
+			if(phone == "") {
+				$('#phoneError').text("Введите номер");
+				return msg;
+    		}
+			else if (phone.length !=10) {
+                msg = $('#phoneError').text("Ошибка (необходимо 10 цифр номера)");
+                return msg;
+			}
+			else if (filter.test(phone)) {
+				$('#phoneError').text("");
+                msg = "";
+                return msg;
+			}
+			else {
+				msg = $('#phoneError').text("Ошибка ввода номера");
+                return msg;
+			}
+		}
+
+		function validEmail() {
+			var email = $("#email").val();
+			var filter = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+
+			if(email == "") {
+				msg = $('#emailError').text("Введите E-Mail");
+				return msg;
+    		}
+			else if (filter.test(email)) {
+				$('#emailError').text("");
+                msg = "";
+                return msg;
+			}
+			else {
+				msg = $('#emailError').text("Ошибка ввода E-Mail");
+                return msg;
+			}
+		}
+	</script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+</body>
+</html>
